@@ -212,14 +212,11 @@
 
 <footer>
   <p>Invisible Cost · one hidden cost, explained in under a minute<br>
-  Nothing you type is stored and nothing is sent anywhere.</p>
-  <!-- Cloudflare Web Analytics goes here: free, cookieless, one tag. Add the line
-       below WITH a real token, and only then say so in the footer - a page that
-       claims cookieless analytics while measuring nothing is a small lie, and this
-       page's whole job is being the one place the numbers are true.
-  <script defer src="https://static.cloudflareinsights.com/beacon.min.js"
-          data-cf-beacon='{"token": "PASTE_TOKEN"}'></script>
-  -->
+  Nothing you type is stored or sent. Visits are counted without cookies.</p>
+  <!-- No analytics tag here on purpose. Cloudflare proxies this domain and injects
+       its Web Analytics beacon itself, for browser requests only - which is why a
+       plain `curl` shows no beacon and a request with browser headers is 359 bytes
+       longer. Pasting a tag as well would count every visit twice. -->
 </footer>
 
 </div>
