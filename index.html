@@ -75,6 +75,18 @@
      which widens the whole document and clips every heading on the page. */
   .row > label { flex: 1; min-width: 0; }
 
+  /* Two ways in: a lump sum left alone, or something paid in every month. Both are
+     ordinary and the arithmetic differs, so the page asks rather than assuming. */
+  .modes { display: flex; gap: .5rem; margin-bottom: .9rem; }
+  .modes label {
+    flex: 1; margin: 0; text-align: center; cursor: pointer;
+    border: 1.5px solid var(--line); border-radius: 9px; padding: .55rem .4rem;
+    font-size: .9rem;
+  }
+  .modes input { position: absolute; opacity: 0; width: 0; height: 0; }
+  .modes label:has(input:checked) { border-color: var(--ink); background: var(--tint); font-weight: 600; }
+  .modes label:has(input:focus-visible) { outline: 2px solid var(--red); outline-offset: 1px; }
+
   .out {
     background: var(--tint);
     border: 1.5px solid var(--ink);
@@ -139,10 +151,15 @@
 <!-- ============================ FEES ============================ -->
 <section id="fees">
   <h2 class="marker">What a fee takes over a working life</h2>
-  <p class="answers">Answers: a one percent fee · a platform fee on a small regular amount · “free” trades · starting five years later</p>
+  <p class="answers">Answers: a one percent fee · a platform fee on a small regular amount · a pension left alone for forty years · “free” trades</p>
+
+  <div class="modes">
+    <label><input type="radio" name="f-mode" value="monthly" checked> Paid in every month</label>
+    <label><input type="radio" name="f-mode" value="lump"> Paid in once, then left</label>
+  </div>
 
   <div class="row">
-    <label><span>Paid in each month</span><input id="f-mon" type="number" inputmode="decimal" value="200" min="0" step="10"></label>
+    <label><span id="f-amt-label">Paid in each month</span><input id="f-mon" type="number" inputmode="decimal" value="200" min="0" step="10"></label>
     <label><span>For how many years</span><input id="f-yrs" type="number" inputmode="decimal" value="40" min="1" step="1"></label>
   </div>
   <div class="row">
@@ -259,10 +276,17 @@
     return { months: Math.ceil(n), paid: payment * n, interest: payment * n - balance };
   };
 
+  // Money paid in month by month compounds monthly; a single sum left alone is
+  // quoted annually, which is how a pension statement puts it and how the video
+  // that sends people here works it out.
   const futureValue = (monthly, years, annualPct) => {
     const r = annualPct / 100 / 12, n = Math.round(years * 12);
     return r === 0 ? monthly * n : monthly * ((Math.pow(1 + r, n) - 1) / r);
   };
+  const futureValueLump = (amount, years, annualPct) =>
+    amount * Math.pow(1 + annualPct / 100, years);
+
+  const feeMode = () => document.querySelector('input[name="f-mode"]:checked').value;
 
   const big = (el, html) => { $(el).innerHTML = html; };
 
@@ -294,10 +318,15 @@
   }
 
   function fees() {
-    const mon = num("f-mon"), yrs = num("f-yrs"), ret = num("f-ret"), fee = num("f-fee");
-    const gross = futureValue(mon, yrs, ret);
-    const net = futureValue(mon, yrs, Math.max(ret - fee, 0));
+    const amt = num("f-mon"), yrs = num("f-yrs"), ret = num("f-ret"), fee = num("f-fee");
+    const lump = feeMode() === "lump";
+    $("f-amt-label").textContent = lump ? "Paid in at the start" : "Paid in each month";
+
+    const grow = lump ? futureValueLump : futureValue;
+    const gross = grow(amt, yrs, ret);
+    const net = grow(amt, yrs, Math.max(ret - fee, 0));
     const lost = gross - net;
+
     big("f-out", "The fee takes <em>" + money(lost) + "</em>");
     $("f-note").textContent = "Without it you would have " + money(gross) + "; with it, "
       + money(net) + ". That is " + (gross > 0 ? (100 * lost / gross).toFixed(0) : 0)
@@ -331,7 +360,10 @@
   }
 
   const all = () => { debt(); fees(); spread(); recurring(); fx(); };
-  document.querySelectorAll("input").forEach(i => i.addEventListener("input", all));
+  document.querySelectorAll("input").forEach(i => {
+    i.addEventListener("input", all);
+    i.addEventListener("change", all);   // radios fire change, not input
+  });
   all();
 })();
 </script>
