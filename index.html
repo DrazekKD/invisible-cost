@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Invisible Cost — work out your own number</title>
+<meta name="description" content="Five calculators for the money that leaves without you seeing it go. Free, no sign-up, nothing stored.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap" rel="stylesheet">
+<style>
+  /* One deliberate look: white paper, black marker, one red. Same red as the
+     highlighted word in every video and the channel avatar, so the page and the
+     films speak in one colour. Light only - the identity is paper. */
+  :root {
+    color-scheme: light;
+    --ink: #1a1a1a;
+    --red: #e62020;
+    --line: #dcdcdc;
+    --muted: #6e6e6e;
+    --paper: #fff;
+    --tint: #faf9f8;
+  }
+  * { box-sizing: border-box; }
+  h1, h2, p, .big { overflow-wrap: break-word; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    padding: 1.25rem 1rem 4rem;
+    background: var(--paper);
+    color: var(--ink);
+    font: 400 17px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  .wrap { max-width: 34rem; margin: 0 auto; }
+  .marker { font-family: "Permanent Marker", "Marker Felt", cursive; font-weight: 400; }
+
+  header { text-align: center; margin-bottom: 1.5rem; }
+  header svg { width: 62px; height: 62px; display: block; margin: 0 auto .6rem; }
+  /* Permanent Marker runs wide. Sized to fit a 360px phone without clipping, and
+     allowed to break rather than overflow if a word is longer than the line. */
+  h1 { font-size: 1.55rem; line-height: 1.2; margin: 0 0 .4rem; }
+  @media (min-width: 26rem) { h1 { font-size: 1.9rem; } }
+  .sub { color: var(--muted); margin: 0; font-size: 1rem; }
+
+  /* Not in the footer. A page that puts numbers in front of people has to say
+     what they are before they act on them, not after. */
+  .disclaimer {
+    border: 2px solid var(--ink);
+    border-radius: 10px;
+    padding: .7rem .9rem;
+    margin: 1.5rem 0 2rem;
+    font-size: .92rem;
+  }
+  .disclaimer b { border-bottom: 3px solid var(--red); }
+
+  section { border-top: 1px solid var(--line); padding-top: 1.75rem; margin-top: 2rem; }
+  h2 { font-size: 1.4rem; margin: 0 0 .2rem; }
+  .answers { color: var(--muted); font-size: .88rem; margin: 0 0 1.1rem; }
+
+  label { display: block; margin-bottom: .85rem; font-size: .93rem; }
+  label span { display: block; margin-bottom: .25rem; }
+  input {
+    width: 100%;
+    font: inherit;
+    padding: .7rem .8rem;          /* big enough for a thumb */
+    border: 1.5px solid var(--line);
+    border-radius: 9px;
+    background: var(--paper);
+    color: var(--ink);
+  }
+  input:focus { outline: 2px solid var(--red); outline-offset: 1px; border-color: var(--ink); }
+  .row { display: flex; gap: .7rem; }
+  /* min-width:0 is not optional. A flex child defaults to min-width:auto, and a
+     number input's intrinsic width then pushes the row wider than the screen -
+     which widens the whole document and clips every heading on the page. */
+  .row > label { flex: 1; min-width: 0; }
+
+  .out {
+    background: var(--tint);
+    border: 1.5px solid var(--ink);
+    border-radius: 10px;
+    padding: .9rem 1rem;
+    margin-top: .4rem;
+  }
+  .big { font-size: 1.4rem; line-height: 1.25; margin: 0; }
+  @media (min-width: 26rem) { .big { font-size: 1.6rem; } }
+  .big em { font-style: normal; color: var(--red); }
+  .note { margin: .5rem 0 0; font-size: .92rem; color: var(--muted); }
+  .warn { color: var(--red); font-weight: 600; }
+
+  footer { border-top: 1px solid var(--line); margin-top: 3rem; padding-top: 1.2rem;
+           font-size: .82rem; color: var(--muted); text-align: center; }
+  footer a { color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <!-- The channel mark, inline so the page carries no external asset. -->
+  <svg viewBox="0 0 100 100" role="img" aria-label="Invisible Cost">
+    <circle cx="50" cy="50" r="42" fill="#1a1a1a"/>
+    <path d="M50 50 L92 50 A42 42 0 0 0 63 10.5 Z" fill="#fff"/>
+    <path d="M50 50 L90.5 46 A42 42 0 0 0 64.5 12 Z" fill="#e62020"/>
+  </svg>
+  <h1 class="marker">Work out your own number</h1>
+  <p class="sub">Five calculators for the money that leaves without you seeing it go.</p>
+</header>
+
+<div class="disclaimer">
+  <b>These are worked examples, not financial advice.</b>
+  Every figure is arithmetic on the numbers you type. Your own lender, platform or bank
+  uses its own rules, so treat the answer as the shape of the thing, not a quote.
+  Nothing you enter leaves your phone.
+</div>
+
+<!-- ============================ DEBT ============================ -->
+<section id="debt">
+  <h2 class="marker">What that balance really takes</h2>
+  <p class="answers">Answers: the minimum payment · a longer loan for a lower payment · “zero percent” finance · an overdraft</p>
+
+  <div class="row">
+    <label><span>Balance</span><input id="d-bal" type="number" inputmode="decimal" value="3000" min="0" step="100"></label>
+    <label><span>Interest rate % a year</span><input id="d-apr" type="number" inputmode="decimal" value="22" min="0" step="0.1"></label>
+  </div>
+  <label><span>If you instead paid this much a month</span><input id="d-fixed" type="number" inputmode="decimal" value="100" min="0" step="10"></label>
+
+  <div class="out">
+    <p class="big" id="d-min"></p>
+    <p class="note" id="d-min-note"></p>
+    <p class="big" id="d-fix" style="margin-top:.8rem"></p>
+    <p class="note" id="d-fix-note"></p>
+  </div>
+  <p class="note">The minimum is modelled the common way: one percent of the balance plus that
+     month’s interest, never less than twenty-five. It shrinks as the balance does, which is
+     exactly why it takes so long.</p>
+</section>
+
+<!-- ============================ FEES ============================ -->
+<section id="fees">
+  <h2 class="marker">What a fee takes over a working life</h2>
+  <p class="answers">Answers: a one percent fee · a platform fee on a small regular amount · “free” trades · starting five years later</p>
+
+  <div class="row">
+    <label><span>Paid in each month</span><input id="f-mon" type="number" inputmode="decimal" value="200" min="0" step="10"></label>
+    <label><span>For how many years</span><input id="f-yrs" type="number" inputmode="decimal" value="40" min="1" step="1"></label>
+  </div>
+  <div class="row">
+    <label><span>Growth % a year</span><input id="f-ret" type="number" inputmode="decimal" value="6" min="0" step="0.1"></label>
+    <label><span>Fee % a year</span><input id="f-fee" type="number" inputmode="decimal" value="1" min="0" step="0.05"></label>
+  </div>
+
+  <div class="out">
+    <p class="big" id="f-out"></p>
+    <p class="note" id="f-note"></p>
+  </div>
+</section>
+
+<!-- ============================ SPREAD ============================ -->
+<section id="spread">
+  <h2 class="marker">The gap your bank keeps</h2>
+  <p class="answers">Answers: paid half a percent, charged twenty-two · the “free” current account · money in transit</p>
+
+  <div class="row">
+    <label><span>Savings</span><input id="s-save" type="number" inputmode="decimal" value="4000" min="0" step="100"></label>
+    <label><span>Paid % a year</span><input id="s-srate" type="number" inputmode="decimal" value="0.5" min="0" step="0.1"></label>
+  </div>
+  <div class="row">
+    <label><span>Debt</span><input id="s-debt" type="number" inputmode="decimal" value="3000" min="0" step="100"></label>
+    <label><span>Charged % a year</span><input id="s-drate" type="number" inputmode="decimal" value="22" min="0" step="0.1"></label>
+  </div>
+
+  <div class="out">
+    <p class="big" id="sp-out"></p>
+    <p class="note" id="sp-note"></p>
+  </div>
+</section>
+
+<!-- ============================ RECURRING ============================ -->
+<section id="recurring">
+  <h2 class="marker">What it adds up to</h2>
+  <p class="answers">Answers: the subscription still charging you · the daily coffee · paid storage · an automatic annual rise</p>
+
+  <div class="row">
+    <label><span>Cost a month</span><input id="r-mon" type="number" inputmode="decimal" value="12" min="0" step="1"></label>
+    <label><span>Years</span><input id="r-yrs" type="number" inputmode="decimal" value="10" min="1" step="1"></label>
+  </div>
+  <label><span>Rises % a year</span><input id="r-inc" type="number" inputmode="decimal" value="5" min="0" step="0.5"></label>
+
+  <div class="out">
+    <p class="big" id="r-out"></p>
+    <p class="note" id="r-note"></p>
+  </div>
+</section>
+
+<!-- ============================ FX ============================ -->
+<section id="fx">
+  <h2 class="marker">What the conversion took</h2>
+  <p class="answers">Answers: paying in your own currency abroad · the rate you saw against the rate you got</p>
+
+  <div class="row">
+    <label><span>Amount converted</span><input id="x-amt" type="number" inputmode="decimal" value="800" min="0" step="50"></label>
+    <label><span>Margin % on the rate</span><input id="x-mar" type="number" inputmode="decimal" value="4" min="0" step="0.1"></label>
+  </div>
+  <label><span>Times a year you do this</span><input id="x-times" type="number" inputmode="decimal" value="2" min="1" step="1"></label>
+
+  <div class="out">
+    <p class="big" id="x-out"></p>
+    <p class="note" id="x-note"></p>
+  </div>
+</section>
+
+<footer>
+  <p>Invisible Cost · one hidden cost, explained in under a minute<br>
+  Nothing you type is stored and nothing is sent anywhere.</p>
+  <!-- Cloudflare Web Analytics goes here: free, cookieless, one tag. Add the line
+       below WITH a real token, and only then say so in the footer - a page that
+       claims cookieless analytics while measuring nothing is a small lie, and this
+       page's whole job is being the one place the numbers are true.
+  <script defer src="https://static.cloudflareinsights.com/beacon.min.js"
+          data-cf-beacon='{"token": "PASTE_TOKEN"}'></script>
+  -->
+</footer>
+
+</div>
+
+<script>
+(() => {
+  "use strict";
+  const $ = id => document.getElementById(id);
+  const money = n => "$" + Math.round(n).toLocaleString("en-US");
+  const num = id => { const v = parseFloat($(id).value); return Number.isFinite(v) ? v : 0; };
+
+  const duration = months => {
+    const y = Math.floor(months / 12), m = months % 12;
+    if (y === 0) return m + (m === 1 ? " month" : " months");
+    if (m === 0) return y + (y === 1 ? " year" : " years");
+    return y + (y === 1 ? " year " : " years ") + m + (m === 1 ? " month" : " months");
+  };
+
+  // The declining minimum: one percent of the balance plus interest, floored. This is
+  // the model the videos quote, and it is the reason a minimum payment takes decades -
+  // the payment falls as fast as the balance does.
+  const onMinimum = (balance, apr, pct = 0.01, floor = 25) => {
+    const r = apr / 100 / 12;
+    let bal = balance, months = 0, paid = 0;
+    while (bal > 0.01 && months < 12000) {
+      const interest = bal * r;
+      const pay = Math.min(Math.max(bal * pct + interest, floor), bal + interest);
+      if (pay <= interest) return null;         // floor below the interest: never clears
+      paid += pay; bal += interest - pay; months++;
+    }
+    return months >= 12000 ? null : { months, paid, interest: paid - balance };
+  };
+
+  const onFixed = (balance, apr, payment) => {
+    const r = apr / 100 / 12;
+    if (payment <= 0) return null;
+    if (r === 0) { const m = Math.ceil(balance / payment); return { months: m, paid: balance, interest: 0 }; }
+    if (payment <= balance * r) return null;    // the punchline, not an error
+    const n = -Math.log(1 - r * balance / payment) / Math.log(1 + r);
+    return { months: Math.ceil(n), paid: payment * n, interest: payment * n - balance };
+  };
+
+  const futureValue = (monthly, years, annualPct) => {
+    const r = annualPct / 100 / 12, n = Math.round(years * 12);
+    return r === 0 ? monthly * n : monthly * ((Math.pow(1 + r, n) - 1) / r);
+  };
+
+  const big = (el, html) => { $(el).innerHTML = html; };
+
+  function debt() {
+    const bal = num("d-bal"), apr = num("d-apr"), fixed = num("d-fixed");
+    const m = onMinimum(bal, apr);
+    if (!m) {
+      big("d-min", '<span class="warn">On the minimum, this never clears.</span>');
+      $("d-min-note").textContent = "The payment is smaller than the interest added each month, so the balance grows however long you keep paying.";
+    } else {
+      big("d-min", "On the minimum: <em>" + duration(m.months) + "</em>");
+      // One ratio per sentence. "$7,433 for a $3,000 debt" and "1.5 times" in the
+      // same breath are two different multiples and the reader has to stop and work
+      // out which is which - on a page whose whole job is one clear number.
+      $("d-min-note").textContent =
+        "You hand over " + money(m.paid) + " for a " + money(bal) + " debt. "
+        + money(m.interest) + " of that is interest"
+        + (m.interest > bal ? " — more than the debt itself." : ".");
+    }
+    const f = onFixed(bal, apr, fixed);
+    if (!f) {
+      big("d-fix", '<span class="warn">At ' + money(fixed) + ' a month: never.</span>');
+      $("d-fix-note").textContent = "Interest alone is " + money(bal * apr / 100 / 12) + " a month.";
+    } else {
+      big("d-fix", "At " + money(fixed) + " a month: <em>" + duration(f.months) + "</em>");
+      $("d-fix-note").textContent = "Interest paid: " + money(f.interest)
+        + (m ? " — " + money(m.interest - f.interest) + " less." : ".");
+    }
+  }
+
+  function fees() {
+    const mon = num("f-mon"), yrs = num("f-yrs"), ret = num("f-ret"), fee = num("f-fee");
+    const gross = futureValue(mon, yrs, ret);
+    const net = futureValue(mon, yrs, Math.max(ret - fee, 0));
+    const lost = gross - net;
+    big("f-out", "The fee takes <em>" + money(lost) + "</em>");
+    $("f-note").textContent = "Without it you would have " + money(gross) + "; with it, "
+      + money(net) + ". That is " + (gross > 0 ? (100 * lost / gross).toFixed(0) : 0)
+      + " percent of the whole pot, for a fee of " + fee + " percent a year.";
+  }
+
+  function spread() {
+    const save = num("s-save"), sr = num("s-srate"), debtAmt = num("s-debt"), dr = num("s-drate");
+    const earned = save * sr / 100, charged = debtAmt * dr / 100;
+    big("sp-out", "The gap costs you <em>" + money(charged - earned) + "</em> a year");
+    $("sp-note").textContent = "Your savings earn " + money(earned) + ". Your debt costs "
+      + money(charged) + ". Same bank, both sides.";
+  }
+
+  function recurring() {
+    const mon = num("r-mon"), yrs = num("r-yrs"), inc = num("r-inc");
+    let total = 0, m = mon;
+    for (let y = 0; y < Math.round(yrs); y++) { total += m * 12; m *= 1 + inc / 100; }
+    big("r-out", "Over " + Math.round(yrs) + " years: <em>" + money(total) + "</em>");
+    $("r-note").textContent = mon > 0
+      ? "It starts at " + money(mon) + " a month and ends at " + money(m) + "."
+      : "";
+  }
+
+  function fx() {
+    const amt = num("x-amt"), mar = num("x-mar"), times = Math.round(num("x-times"));
+    const once = amt * mar / 100;
+    big("x-out", "The margin takes <em>" + money(once * times) + "</em> a year");
+    $("x-note").textContent = money(once) + " each time, " + times
+      + (times === 1 ? " time" : " times") + " a year. It never appears as a fee.";
+  }
+
+  const all = () => { debt(); fees(); spread(); recurring(); fx(); };
+  document.querySelectorAll("input").forEach(i => i.addEventListener("input", all));
+  all();
+})();
+</script>
+</body>
+</html>
